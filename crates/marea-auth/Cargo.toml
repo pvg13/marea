@@ -1,0 +1,37 @@
+[package]
+name = "marea-auth"
+description = "PocketBase auth client, session types, PSK derivation and QR-pairing crypto for marea apps"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+# Dioxus hooks: persistent session signal + AuthState context.
+dioxus = ["dep:dioxus", "dep:dioxus-sdk-storage"]
+# Phone→web QR pairing: X25519 sealed-box handoff via a PocketBase mailbox.
+pairing = ["dep:crypto_box", "dep:getrandom"]
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true }
+thiserror = { workspace = true }
+argon2 = { workspace = true }
+hex = { workspace = true }
+base64 = { workspace = true }
+log = { workspace = true }
+
+dioxus = { workspace = true, optional = true }
+dioxus-sdk-storage = { workspace = true, optional = true }
+crypto_box = { workspace = true, optional = true }
+getrandom = { workspace = true, optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# SystemTime::now() panics on wasm32-unknown-unknown; js-sys provides Date.now().
+js-sys = "0.3"
+
+[dev-dependencies]
+tokio = { workspace = true }
+wiremock = { workspace = true }

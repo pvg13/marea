@@ -1,0 +1,40 @@
+[workspace]
+resolver = "3"
+members = ["crates/marea-auth"]
+# Legacy stubs pending disposition (dioxus-theme folds into marea-ui in F3;
+# dioxus-template gets reworked in F7; examples get replaced by the showcase).
+exclude = ["dioxus-theme", "dioxus-template", "example", "example-theme-app"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/pvg13/marea"
+
+[workspace.dependencies]
+# Keep these pinned in lockstep with the apps (MediterraneaDiente, Ascend,
+# roommates_dx). Apps must consume wavesyncdb / dioxus-sdk-storage / auth types
+# through the marea re-exports so cargo resolves exactly one copy of each.
+dioxus = { version = "0.7.9" }
+# sea-orm req is deliberately NON-strict so Ascend's `=2.0.0-rc.38` pin wins
+# unification (rc.41 pulls sqlx 0.9 → rustc 1.94; the apps build on 1.92).
+sea-orm = { version = "2.0.0-rc", features = ["sqlx-sqlite", "runtime-tokio", "macros"] }
+wavesyncdb = { git = "https://github.com/pvg13/WaveSyncDB.git", branch = "dev", features = ["derive", "dioxus"] }
+# Same revision the apps use (crates.io 0.7.0 predates `data_directory()` and
+# the Android JNI bridge for `getFilesDir()`).
+dioxus-sdk-storage = { git = "https://github.com/DioxusLabs/sdk.git", rev = "15525043cadc3c467afb15888ce804bdc9b6a46e" }
+
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.47", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+thiserror = "2.0"
+argon2 = "0.5"
+hex = "0.4"
+base64 = "0.22"
+crypto_box = { version = "0.9", features = ["std", "seal"] }
+getrandom = { version = "0.2", features = ["js"] }
+log = "0.4"
+
+# dev
+wiremock = "0.6"
