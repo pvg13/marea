@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/marea-auth", "crates/marea-sync"]
+members = ["crates/marea-auth", "crates/marea-sync", "crates/marea-ui"]
 # Legacy stubs pending disposition (dioxus-theme folds into marea-ui in F3;
 # dioxus-template gets reworked in F7; examples get replaced by the showcase).
 exclude = ["dioxus-theme", "dioxus-template", "example", "example-theme-app"]
