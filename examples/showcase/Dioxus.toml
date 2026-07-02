@@ -1,0 +1,5 @@
+[application]
+name = "marea-showcase"
+
+[web.app]
+title = "marea showcase"

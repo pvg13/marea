@@ -1,0 +1,78 @@
+/* Reference token file — copy into your app's stylesheet and reskin.
+   This neutral palette exists so a fresh app renders sensibly before design
+   work starts. Every variable here is REQUIRED by marea.css (see
+   docs/theme-contract.md); app-specific tokens go below it under your own
+   prefix. */
+
+:root {
+  --c-bg:              #f6f7f8;
+  --c-surface:         #ffffff;
+  --c-surface-2:       #eff1f3;
+  --c-surface-hover:   #e9ecee;
+  --c-surface-active:  #e2e6e9;
+  --c-border:          #e3e7ea;
+  --c-border-2:        #cdd4d9;
+  --c-text:            #1d2830;
+  --c-text-2:          #4c5a64;
+  --c-text-3:          #75838d;
+  --c-text-4:          #a4b0b8;
+  --c-heading:         #1d2830;
+  --c-link:            #2e6e8e;
+  --c-primary:         #2e6e8e;
+  --c-primary-h:       #275f7b;
+  --c-primary-deep:    #1f4d64;
+  --c-primary-muted:   rgba(46, 110, 142, 0.12);
+  --c-primary-text:    #f4f9fb;
+  --c-accent:          #b4552b;
+  --c-accent-h:        #9c4824;
+  --c-accent-text:     #fceee7;
+  --c-success:         #3d7a46;
+  --c-success-bg:      #e4f1e6;
+  --c-warning:         #a07724;
+  --c-warning-bg:      #f8eed6;
+  --c-danger:          #a03434;
+  --c-danger-h:        #862b2b;
+  --c-danger-bg:       #f6e2e0;
+  --c-danger-text:     #a03434;
+  --c-overlay:         rgba(20, 26, 30, 0.55);
+  --c-scrollbar-thumb: #c3ccd2;
+  --c-scrollbar-track: #eceff1;
+  --shadow-sm:         0 1px 4px rgba(20, 30, 40, 0.08);
+  --shadow-md:         0 4px 16px rgba(20, 30, 40, 0.12);
+  --shadow-lg:         0 8px 32px rgba(20, 30, 40, 0.16);
+  --navbar-h:          52px;
+  --font-sans:         system-ui, sans-serif;
+  --font-display:      system-ui, sans-serif;
+  --radius-sm:         6px;
+  --radius-md:         10px;
+  --radius-lg:         14px;
+  --radius-xl:         18px;
+}
+
+/* Dark mode — re-declare whatever changes; light-only apps omit the block. */
+[data-theme="dark"] {
+  --c-bg:              #12161a;
+  --c-surface:         #1a2026;
+  --c-surface-2:       #222a31;
+  --c-surface-hover:   #28313a;
+  --c-surface-active:  #2e3944;
+  --c-border:          #2c353e;
+  --c-border-2:        #3b4854;
+  --c-text:            #d6dde2;
+  --c-text-2:          #a2adb6;
+  --c-text-3:          #74818b;
+  --c-text-4:          #4f5b64;
+  --c-heading:         #e6ecf0;
+  --c-link:            #6db1d2;
+  --c-primary:         #4d94b8;
+  --c-primary-h:       #5ea5c8;
+  --c-primary-deep:    #33718f;
+  --c-primary-muted:   rgba(77, 148, 184, 0.16);
+  --c-primary-text:    #0e1418;
+  --c-success-bg:      #16281a;
+  --c-warning-bg:      #2c2413;
+  --c-danger-bg:       #2e1a18;
+  --c-overlay:         rgba(0, 0, 0, 0.65);
+  --c-scrollbar-thumb: #3b4854;
+  --c-scrollbar-track: #1a2026;
+}
