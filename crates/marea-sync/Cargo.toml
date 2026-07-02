@@ -1,0 +1,30 @@
+[package]
+name = "marea-sync"
+description = "WaveSyncDB bootstrap conventions for marea apps: DB locations, schema reconcile, safe CRDT write facades"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+# Passthroughs so apps enable wavesyncdb capabilities through marea-sync
+# instead of declaring their own wavesyncdb dependency (which would risk a
+# second resolution of the git dep and duplicate types).
+web = ["wavesyncdb/web"]
+# Cold-sync push notifications (FCM on Android, APNs on iOS).
+push-sync = ["wavesyncdb/push-sync"]
+
+[dependencies]
+wavesyncdb = { workspace = true }
+dioxus = { workspace = true }
+serde_json = { workspace = true }
+log = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+sea-orm = { workspace = true }
+dioxus-sdk-storage = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
