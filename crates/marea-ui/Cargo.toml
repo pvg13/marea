@@ -13,7 +13,9 @@ pairing = ["marea-auth/pairing"]
 
 [dependencies]
 dioxus = { workspace = true }
+dioxus-sdk-storage = { workspace = true }
 marea-auth = { path = "../marea-auth", features = ["dioxus"] }
+serde = { workspace = true }
 log = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

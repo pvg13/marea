@@ -6,11 +6,21 @@
 //! never uses Tailwind utility classes, so no cross-crate CSS scanning is
 //! needed.
 
+pub mod auth_screens;
 pub mod components;
+pub mod i18n;
+pub mod nav;
+pub mod push;
+pub mod shell;
 pub mod theme;
 pub mod toast;
 
+pub use auth_screens::LoginScreen;
 pub use components::*;
+pub use i18n::{Locale, LocaleCtl, provide_locale, use_locale};
+pub use nav::{NavItem, NavShell};
+pub use push::{PushToken, provide_push_token, set_push_token, use_push_token};
+pub use shell::AppShell;
 pub use theme::{
     MAREA_CSS, THEME_STORAGE_KEY, ThemeCtl, ThemeMode, provide_theme, use_restore_theme, use_theme,
 };

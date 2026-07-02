@@ -15,7 +15,7 @@ repository = "https://github.com/pvg13/marea"
 # Keep these pinned in lockstep with the apps (MediterraneaDiente, Ascend,
 # roommates_dx). Apps must consume wavesyncdb / dioxus-sdk-storage / auth types
 # through the marea re-exports so cargo resolves exactly one copy of each.
-dioxus = { version = "0.7.9" }
+dioxus = { version = "0.7.9", features = ["router"] }
 # sea-orm req is deliberately NON-strict so Ascend's `=2.0.0-rc.38` pin wins
 # unification (rc.41 pulls sqlx 0.9 → rustc 1.94; the apps build on 1.92).
 sea-orm = { version = "2.0.0-rc", features = ["sqlx-sqlite", "runtime-tokio", "macros"] }
