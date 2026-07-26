@@ -77,6 +77,22 @@
 //! `dev.dioxus.main` package dx generates. An app that renames the package must
 //! rename nothing here — it must instead keep its `MainActivity` in that
 //! package, which dx's template already does.
+//!
+//! ## Linking
+//!
+//! Nothing in Rust ever calls the exported function — only Kotlin does, at
+//! runtime — so it is reachable solely by virtue of `#[unsafe(no_mangle)]`.
+//! That makes it worth confirming on a real build that the symbol survives
+//! into the final `.so`, particularly since marea-ui is usually a *transitive*
+//! dependency of the launcher binary (`app → ui → marea-ui`) rather than a
+//! direct one:
+//!
+//! ```sh
+//! llvm-nm --defined-only <artifact> | grep MainActivity_onBack
+//! ```
+//!
+//! A missing symbol shows up as an `UnsatisfiedLinkError` the first time the
+//! user presses back, not at build time.
 
 use dioxus::prelude::*;
 
