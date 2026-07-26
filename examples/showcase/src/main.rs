@@ -72,6 +72,12 @@ fn nav_items() -> Vec<NavItem<Route>> {
 #[component]
 fn Shell() -> Element {
     rsx! {
+        // Android back gesture → router. Must sit inside `Router` (it reads
+        // the navigator and the route) and inside the authed subtree, so it
+        // resets on logout. Renders nothing anywhere, and does nothing off
+        // Android — no `cfg` needed at the call site.
+        marea_ui::back_gesture::GlobalBackHandler {}
+
         NavShell {
             items: nav_items(),
             brand: rsx! { "marea" },

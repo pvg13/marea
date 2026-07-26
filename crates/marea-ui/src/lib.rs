@@ -26,6 +26,11 @@ pub mod scanner;
 #[cfg(feature = "pairing")]
 pub mod pairing;
 
+/// Android back gesture → router (`android-back` feature). Inert on every
+/// other target, but opt-in because it exports a fixed JNI symbol.
+#[cfg(feature = "android-back")]
+pub mod back_gesture;
+
 pub use auth_screens::LoginScreen;
 pub use components::*;
 pub use i18n::{Locale, LocaleCtl, provide_locale, use_locale};

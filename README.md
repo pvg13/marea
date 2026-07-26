@@ -11,7 +11,7 @@ component library from here.
 |---|---|
 | `marea-auth` | PocketBase client (login/register/refresh, structured field errors), `AuthSession`, Argon2id PSK derivation with per-app domain salt, JWT freshness, QR-pairing crypto (`pairing` feature), Dioxus session hooks (`dioxus` feature) |
 | `marea-sync` | `DbLocator` (per-app/per-account SQLite locations), `registry_name!`, idempotent `schema::ensure_columns`, the safe CRDT write facades (`SyncDbExt` on `WaveSyncDb`, cross-target `SyncHandleExt` on `SyncHandle`), re-exported `wavesyncdb` |
-| `marea-ui` | `AppShell` (theme restore, providers, auth gate, uid-keyed subtree), `NavShell` (sidebar ≥768px / bottom tabs, `mobile_only` mode), `LoginScreen`, component library, toasts, `ThemeCtl`, push-token context, `Locale`, camera scanner (`scanner` feature), QR-pairing screens (`pairing` feature) |
+| `marea-ui` | `AppShell` (theme restore, providers, auth gate, uid-keyed subtree), `NavShell` (sidebar ≥768px / bottom tabs, `mobile_only` mode), `LoginScreen`, component library, toasts, `ThemeCtl`, push-token context, `Locale`, camera scanner (`scanner` feature), QR-pairing screens (`pairing` feature), Android back gesture (`android-back` feature) |
 
 ## How an app plugs in
 
@@ -81,7 +81,10 @@ For the next two:
   the `PairBrowserSection` half of `pages::profile::link` →
   `PairDeviceSection`, and `ui::scanner`'s camera core →
   `marea_ui::scanner` (Mediterranea keeps only `ScannerOverlay`'s food-product
-  chrome). Still to port first: the Android back-gesture module.
+  chrome). `ui::back_gesture` → `marea_ui::back_gesture` (`android-back`
+  feature) — Mediterranea must delete its own copy, or the two JNI exports
+  collide at link time. No framework blockers remain; what's still app-side is
+  the iOS App Group data root, `deep_link`, `pull_to_refresh` and `feedback`.
   `ui::sync_ext` → marea-sync `SyncHandleExt`
   (already a byte-compatible port). `session.rs` → `DbLocator("Mediterranea",
   "mediterranea.db")`. Keep household invites app-side on

@@ -14,6 +14,12 @@ default = []
 scanner = []
 # Phone→web QR pairing screens: `PairScreen` (web) + `PairDeviceSection` (native).
 pairing = ["scanner", "dep:qrcode", "marea-auth/pairing"]
+# Android system back gesture → router. Opt-in rather than always-on for
+# Android: it exports a fixed JNI symbol
+# (`Java_dev_dioxus_main_MainActivity_onBack`), so an app that wants to own
+# back handling itself would otherwise hit a duplicate-symbol link error with
+# no way to opt out.
+android-back = []
 
 [dependencies]
 dioxus = { workspace = true }
@@ -32,6 +38,14 @@ qrcode = { version = "0.14", default-features = false, features = [
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { workspace = true }
 
+# Only the `android-back` feature uses this, but Cargo can't express
+# "optional dep of a target-specific table gated on a feature" — target
+# tables don't take `optional` + feature activation the way the main table
+# does. Scoping it to Android instead keeps it out of every other build,
+# which is the cost that actually mattered.
+[target.'cfg(target_os = "android")'.dependencies]
+jni = { workspace = true }
+
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 gloo-timers = { version = "0.3", features = ["futures"] }
 # `Date.now()` for the pairing poll deadline — `std::time::Instant` panics on
@@ -47,3 +61,7 @@ dioxus-ssr = "0.7"
 [[test]]
 name = "pairing_ssr"
 required-features = ["pairing"]
+
+[[test]]
+name = "back_gesture_ssr"
+required-features = ["android-back"]

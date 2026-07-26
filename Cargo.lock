@@ -5209,6 +5209,7 @@ dependencies = [
  "dioxus-sdk-storage",
  "dioxus-ssr",
  "gloo-timers 0.3.0",
+ "jni 0.21.1",
  "js-sys",
  "log",
  "marea-auth",

@@ -10,7 +10,7 @@ and consumption model, `docs/theme-contract.md` for the styling contract.
 crates/marea-auth    PocketBase + AuthSession + PSK + pairing crypto (+dioxus hooks feature)
 crates/marea-sync    WaveSyncDB conventions: DbLocator, registry_name!, schema, write facades
 crates/marea-ui      AppShell, NavShell, LoginScreen, components, toasts, theme, push, i18n
-                     (+ `scanner` feature: camera; `pairing` feature: QR login screens)
+                     (+ features: `scanner` camera, `pairing` QR login, `android-back` JNI)
 examples/showcase    real app exercising everything (dx serve from its dir)
 docs/                theme-contract.md
 dioxus-template/ …   legacy pre-marea dirs, untracked/gitignored, pending rework

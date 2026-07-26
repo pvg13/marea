@@ -35,6 +35,9 @@ base64 = "0.22"
 crypto_box = { version = "0.9", features = ["std", "seal"] }
 getrandom = { version = "0.2", features = ["js"] }
 log = "0.4"
+# Android back-gesture bridge: marea-ui exports a JNI symbol that
+# `MainActivity.onBack()` calls. Same spec as MediterraneaDiente's.
+jni = "0.21"
 
 # dev
 wiremock = "0.6"
