@@ -8,8 +8,12 @@ repository.workspace = true
 
 [features]
 default = []
-# Phone→web QR pairing screens (PairScreen on web, scanner hook on mobile).
-pairing = ["marea-auth/pairing"]
+# Camera code scanner: live `<video>` feed + `BarcodeDetector` polling, with a
+# vendored ZXing-JS polyfill on iOS (WebKit has no BarcodeDetector). Usable on
+# its own for barcode scanning; `pairing` builds its QR takeover on it.
+scanner = []
+# Phone→web QR pairing screens: `PairScreen` (web) + `PairDeviceSection` (native).
+pairing = ["scanner", "dep:qrcode", "marea-auth/pairing"]
 
 [dependencies]
 dioxus = { workspace = true }
@@ -18,11 +22,28 @@ marea-auth = { path = "../marea-auth", features = ["dioxus"] }
 serde = { workspace = true }
 log = { workspace = true }
 
+# QR *generation* for the pairing tile. Spec must stay byte-identical to
+# MediterraneaDiente's (`packages/ui/Cargo.toml`) — see the workspace manifest's
+# note on duplicate resolutions.
+qrcode = { version = "0.14", default-features = false, features = [
+    "svg",
+], optional = true }
+
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { workspace = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 gloo-timers = { version = "0.3", features = ["futures"] }
+# `Date.now()` for the pairing poll deadline — `std::time::Instant` panics on
+# wasm32-unknown-unknown. Unconditional (not feature-gated) because marea-auth
+# already pulls it on this target, so it costs nothing to keep the cfg simple.
+js-sys = "0.3"
 
 [dev-dependencies]
 dioxus-ssr = "0.7"
+
+# Guards the default `cargo test -p marea-ui` (no features) from trying to
+# compile a suite whose modules aren't in the crate.
+[[test]]
+name = "pairing_ssr"
+required-features = ["pairing"]

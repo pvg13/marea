@@ -42,7 +42,7 @@ pub use session::AuthSession;
 #[cfg(feature = "pairing")]
 pub use pairing::{
     MailboxRecord, PairingConfig, PairingError, WebPairingKeys, generate_code, pair_url,
-    seal_session, seal_value, unseal_session, unseal_value,
+    parse_pair_url, seal_session, seal_value, unseal_session, unseal_value,
 };
 
 #[cfg(feature = "dioxus")]

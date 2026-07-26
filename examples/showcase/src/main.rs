@@ -54,6 +54,8 @@ enum Route {
     Gallery {},
     #[route("/forms")]
     Forms {},
+    #[route("/pairing")]
+    PairingDemo {},
     #[route("/settings")]
     SettingsPage {},
 }
@@ -62,6 +64,7 @@ fn nav_items() -> Vec<NavItem<Route>> {
     vec![
         NavItem::new("Gallery", rsx! { GridIcon {} }, Route::Gallery {}),
         NavItem::new("Forms", rsx! { InputIcon {} }, Route::Forms {}),
+        NavItem::new("Pairing", rsx! { QrIcon {} }, Route::PairingDemo {}),
         NavItem::new("Settings", rsx! { GearIcon {} }, Route::SettingsPage {}),
     ]
 }
@@ -261,6 +264,101 @@ fn SettingsPage() -> Element {
     }
 }
 
+// ── Pairing demo ─────────────────────────────────────────────────────────────
+
+static PAIRING: marea_auth::PairingConfig = marea_auth::PairingConfig {
+    url_scheme: "mareashowcase",
+    mailbox_collection: "pairing_mailboxes",
+    ttl_secs: 300,
+};
+
+/// Renders the pairing screen in every state, plus the scan overlay.
+///
+/// A **render demo, not a live pairing**: the QR below encodes a throwaway key
+/// that no phone is waiting on. A real handoff needs two devices running the
+/// *same* app — the sealed payload carries that app's session and PSK, so
+/// pairing across apps is meaningless even though they share a PocketBase.
+/// The live driver is `marea_ui::pairing::PairScreen`, and it only exists on
+/// the web build.
+#[component]
+fn PairingDemo() -> Element {
+    use marea_ui::pairing::{PairScreenView, PairState};
+
+    // Generated once so the QR doesn't churn on every state change.
+    let keys = use_hook(marea_auth::WebPairingKeys::generate);
+    let code = use_hook(marea_auth::generate_code);
+    let payload = marea_auth::pair_url(&PAIRING, &code, &keys.pubkey_b64());
+
+    let mut state = use_signal(|| PairState::Waiting);
+    let mut scanning = use_signal(|| false);
+    // Hooks run at the component top, never inside a handler.
+    let toasts = use_toasts();
+
+    let states = [
+        ("Creating", PairState::Creating),
+        ("Waiting", PairState::Waiting),
+        ("Decrypting", PairState::Decrypting),
+        ("Success", PairState::Success),
+        ("Expired", PairState::Expired),
+        ("Failed", PairState::Failed),
+    ];
+
+    rsx! {
+        div { class: "page",
+            TopBar { title: "Pairing" }
+            div { style: "padding: 16px; display: flex; flex-direction: column; gap: 16px;",
+                Card { pad: CardPad::Md,
+                    Eyebrow { "Render demo" }
+                    p { style: "margin:8px 0 12px;",
+                        "This draws every state of the pairing screen. It is not a live pairing — no phone is waiting on this code, and pairing only ever works between two devices running the same app."
+                    }
+                    div { style: "display:flex;flex-wrap:wrap;gap:8px;",
+                        for (label, s) in states {
+                            Button {
+                                small: true,
+                                variant: if state() == s { ButtonVariant::Primary } else { ButtonVariant::Secondary },
+                                onclick: move |_| state.set(s),
+                                "{label}"
+                            }
+                        }
+                        Button {
+                            small: true,
+                            variant: ButtonVariant::Outline,
+                            onclick: move |_| scanning.set(true),
+                            "Open scanner"
+                        }
+                    }
+                }
+
+                PairScreenView {
+                    state: state(),
+                    payload,
+                    code,
+                    brand: "marea showcase".to_string(),
+                    logo: rsx! { WaveLogo {} },
+                    error: if state() == PairState::Failed {
+                        Some("Couldn't start pairing: connection refused".to_string())
+                    } else {
+                        None
+                    },
+                }
+            }
+
+            if scanning() {
+                marea_ui::scanner::QrScanOverlay {
+                    title: "Scan a pairing code".to_string(),
+                    hint: "Point the camera at the code on the other screen".to_string(),
+                    on_close: move |_| scanning.set(false),
+                    on_detect: move |scanned: String| {
+                        scanning.set(false);
+                        toasts.info(format!("Scanned: {scanned}"));
+                    },
+                }
+            }
+        }
+    }
+}
+
 // ── currentColor SVG icons ───────────────────────────────────────────────────
 
 #[component]
@@ -296,6 +394,20 @@ fn InputIcon() -> Element {
             stroke: "currentColor", stroke_width: "1.8", stroke_linecap: "round",
             rect { x: "3", y: "7", width: "18", height: "10", rx: "2" }
             path { d: "M7 12h.01" }
+        }
+    }
+}
+
+#[component]
+fn QrIcon() -> Element {
+    rsx! {
+        svg {
+            width: "22", height: "22", view_box: "0 0 24 24", fill: "none",
+            stroke: "currentColor", stroke_width: "1.8", stroke_linecap: "round",
+            rect { x: "3", y: "3", width: "7", height: "7", rx: "1.5" }
+            rect { x: "3", y: "14", width: "7", height: "7", rx: "1.5" }
+            rect { x: "14", y: "3", width: "7", height: "7", rx: "1.5" }
+            path { d: "M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1" }
         }
     }
 }

@@ -15,6 +15,17 @@ pub mod shell;
 pub mod theme;
 pub mod toast;
 
+/// Camera code scanner (`scanner` feature). Off by default — it pulls a
+/// vendored decoder on iOS and asks for camera permission, neither of which
+/// an app that doesn't scan should carry.
+#[cfg(feature = "scanner")]
+pub mod scanner;
+
+/// Phone→web QR pairing screens (`pairing` feature), over
+/// [`marea_auth::pairing`]'s sealed-box mailbox handoff.
+#[cfg(feature = "pairing")]
+pub mod pairing;
+
 pub use auth_screens::LoginScreen;
 pub use components::*;
 pub use i18n::{Locale, LocaleCtl, provide_locale, use_locale};

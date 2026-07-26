@@ -117,8 +117,87 @@ pub fn generate_code() -> String {
 }
 
 /// The deep-link URL encoded into the QR the phone scans.
+///
+/// The pubkey is percent-encoded: base64 (`A-Za-z0-9+/=`) carries `+` and `/`,
+/// both of which are ambiguous in a query value (`+` decodes as a space under
+/// form-encoding rules), which would corrupt the key before it ever reaches
+/// [`seal_value`]. `=` needs no escaping in a query value, and
+/// [`WebPairingKeys::pubkey_b64`] emits unpadded base64 anyway.
+/// [`parse_pair_url`] is the exact inverse.
 pub fn pair_url(cfg: &PairingConfig, code: &str, pubkey_b64: &str) -> String {
-    format!("{}://pair?code={code}&pubkey={pubkey_b64}", cfg.url_scheme)
+    format!(
+        "{}://pair?code={code}&pubkey={}",
+        cfg.url_scheme,
+        url_encode(pubkey_b64)
+    )
+}
+
+/// Parse a scanned pairing deep link back into `(code, pubkey_b64)`.
+///
+/// Returns `None` for anything that isn't this app's `pair` link or that is
+/// missing either field — the phone side treats that as "not a pairing QR"
+/// and shows a scan error rather than attempting a handoff.
+pub fn parse_pair_url(cfg: &PairingConfig, raw: &str) -> Option<(String, String)> {
+    let prefix = format!("{}://pair?", cfg.url_scheme);
+    let query = raw.trim().strip_prefix(&prefix)?;
+    let mut code = None;
+    let mut pubkey = None;
+    for pair in query.split('&') {
+        let mut parts = pair.splitn(2, '=');
+        let k = parts.next()?;
+        let v = parts.next().unwrap_or("");
+        match k {
+            "code" => code = Some(v.to_string()),
+            "pubkey" => pubkey = Some(url_decode(v)),
+            _ => {}
+        }
+    }
+    let code = code?;
+    let pubkey = pubkey?;
+    if code.is_empty() || pubkey.is_empty() {
+        return None;
+    }
+    Some((code, pubkey))
+}
+
+/// Escape the two base64 characters that a query value can't carry verbatim.
+/// Avoids a `percent-encoding` dependency for one call site.
+fn url_encode(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            '+' => out.push_str("%2B"),
+            '/' => out.push_str("%2F"),
+            other => out.push(other),
+        }
+    }
+    out
+}
+
+/// Inverse of [`url_encode`]. Decodes any `%XX` escape, not just the two we
+/// emit, so a QR produced by a hand-rolled or third-party encoder still
+/// parses. Byte-oriented: base64 is ASCII, so no UTF-8 reassembly is needed.
+fn url_decode(s: &str) -> String {
+    let bytes = s.as_bytes();
+    let mut out = String::with_capacity(s.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        // A malformed escape (`%` at the end, or non-hex digits) falls through
+        // and is kept verbatim rather than dropped — better a wrong-looking key
+        // that fails to unseal than a silently truncated one.
+        if bytes[i] == b'%'
+            && i + 2 < bytes.len()
+            && let Ok(hex) = std::str::from_utf8(&bytes[i + 1..i + 3])
+            && let Ok(byte) = u8::from_str_radix(hex, 16)
+        {
+            out.push(byte as char);
+            i += 3;
+            continue;
+        }
+        out.push(bytes[i] as char);
+        i += 1;
+    }
+    out
 }
 
 /// Sealed-box encrypt any serializable value for the holder of
@@ -371,6 +450,56 @@ mod tests {
     fn pair_url_uses_the_app_scheme() {
         let url = pair_url(&CFG, "ABCD2345", "pk==");
         assert_eq!(url, "testapp://pair?code=ABCD2345&pubkey=pk==");
+    }
+
+    /// `+` and `/` are legal base64 but ambiguous in a query value. This is
+    /// the format Mediterranea has shipped since its pairing launch — the
+    /// phone-side parser percent-decodes, so the escaping must stay.
+    #[test]
+    fn pair_url_escapes_base64_plus_and_slash() {
+        let url = pair_url(&CFG, "ABCD2345", "a+b/c=");
+        assert_eq!(url, "testapp://pair?code=ABCD2345&pubkey=a%2Bb%2Fc=");
+    }
+
+    #[test]
+    fn parses_well_formed_pair_url() {
+        let (code, pubkey) =
+            parse_pair_url(&CFG, "testapp://pair?code=ABCD1234&pubkey=AAAAA%2BBBBB").unwrap();
+        assert_eq!(code, "ABCD1234");
+        assert_eq!(pubkey, "AAAAA+BBBB");
+    }
+
+    #[test]
+    fn parse_rejects_wrong_scheme() {
+        assert!(parse_pair_url(&CFG, "https://relay.example.es/pair?code=x&pubkey=y").is_none());
+        // Another marea app's link must not pair into this one.
+        assert!(parse_pair_url(&CFG, "otherapp://pair?code=x&pubkey=y").is_none());
+    }
+
+    #[test]
+    fn parse_rejects_missing_fields() {
+        assert!(parse_pair_url(&CFG, "testapp://pair?code=ABCD").is_none());
+        assert!(parse_pair_url(&CFG, "testapp://pair?pubkey=KEY").is_none());
+        assert!(parse_pair_url(&CFG, "testapp://pair?code=&pubkey=").is_none());
+    }
+
+    /// The two halves are used on different devices, so a mismatch would only
+    /// surface as an unseal failure in the field. Lock them together over a
+    /// real generated key, which is where `+`//` actually show up.
+    #[test]
+    fn pair_url_round_trips_through_parse() {
+        let keys = WebPairingKeys::generate();
+        let pubkey = keys.pubkey_b64();
+        let code = generate_code();
+        let (got_code, got_pubkey) =
+            parse_pair_url(&CFG, &pair_url(&CFG, &code, &pubkey)).unwrap();
+        assert_eq!(got_code, code);
+        assert_eq!(got_pubkey, pubkey);
+
+        // And the round-tripped key still decrypts a real sealed session.
+        let s = session();
+        let payload = seal_session(&got_pubkey, &s).unwrap();
+        assert_eq!(unseal_session(&keys.secret, &payload).unwrap(), s);
     }
 
     #[test]

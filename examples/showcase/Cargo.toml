@@ -7,8 +7,10 @@ publish = false
 
 [dependencies]
 dioxus = { workspace = true }
-marea-auth = { path = "../../crates/marea-auth", features = ["dioxus"] }
-marea-ui = { path = "../../crates/marea-ui" }
+marea-auth = { path = "../../crates/marea-auth", features = ["dioxus", "pairing"] }
+# `pairing` (which implies `scanner`) is on because exercising every feature is
+# this example's job — a real app enables it only if it offers QR login.
+marea-ui = { path = "../../crates/marea-ui", features = ["pairing"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 dioxus-sdk-storage = { workspace = true }

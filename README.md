@@ -11,7 +11,7 @@ component library from here.
 |---|---|
 | `marea-auth` | PocketBase client (login/register/refresh, structured field errors), `AuthSession`, Argon2id PSK derivation with per-app domain salt, JWT freshness, QR-pairing crypto (`pairing` feature), Dioxus session hooks (`dioxus` feature) |
 | `marea-sync` | `DbLocator` (per-app/per-account SQLite locations), `registry_name!`, idempotent `schema::ensure_columns`, the safe CRDT write facades (`SyncDbExt` on `WaveSyncDb`, cross-target `SyncHandleExt` on `SyncHandle`), re-exported `wavesyncdb` |
-| `marea-ui` | `AppShell` (theme restore, providers, auth gate, uid-keyed subtree), `NavShell` (sidebar ≥768px / bottom tabs, `mobile_only` mode), `LoginScreen`, component library, toasts, `ThemeCtl`, push-token context, `Locale` |
+| `marea-ui` | `AppShell` (theme restore, providers, auth gate, uid-keyed subtree), `NavShell` (sidebar ≥768px / bottom tabs, `mobile_only` mode), `LoginScreen`, component library, toasts, `ThemeCtl`, push-token context, `Locale`, camera scanner (`scanner` feature), QR-pairing screens (`pairing` feature) |
 
 ## How an app plugs in
 
@@ -76,9 +76,13 @@ Ascend is migrated (branch `marea-migration`) and is the reference diff.
 For the next two:
 
 - **Mediterranea**: `dto` → marea-auth (`psk_domain: b"mediterranea.psk.v1|"`,
-  key `"auth_session"`, `pairing` feature for QR login — port
-  `pair_web.rs`/scanner UI into marea-ui `pairing` feature first, plus the
-  Android back-gesture module). `ui::sync_ext` → marea-sync `SyncHandleExt`
+  key `"auth_session"`, `pairing` feature for QR login). `pair_web.rs` and the
+  scanner are now ported — `ui::pair_web` → `marea_ui::pairing::PairScreen`,
+  the `PairBrowserSection` half of `pages::profile::link` →
+  `PairDeviceSection`, and `ui::scanner`'s camera core →
+  `marea_ui::scanner` (Mediterranea keeps only `ScannerOverlay`'s food-product
+  chrome). Still to port first: the Android back-gesture module.
+  `ui::sync_ext` → marea-sync `SyncHandleExt`
   (already a byte-compatible port). `session.rs` → `DbLocator("Mediterranea",
   "mediterranea.db")`. Keep household invites app-side on
   `marea_auth::seal_value`.

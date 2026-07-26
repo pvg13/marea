@@ -52,12 +52,36 @@ App-specific tokens (Mediterranea's `--c-protein`, Ascend's grid colors …)
 live in the app's file under an app prefix and are never referenced by
 framework CSS.
 
+## Optional tokens
+
+Used only by the `scanner` / `pairing` features. Each is referenced with an
+inline fallback, so an app that doesn't declare them still renders correctly —
+declare one only to override the default.
+
+| Token | Fallback | Controls |
+|---|---|---|
+| `--c-qr-bg` | `#ffffff` | QR tile background, and the badge plate over its centre |
+| `--c-scan-bg-from` | `#23272b` | scan overlay gradient, top |
+| `--c-scan-bg-to` | `#2f3a22` | scan overlay gradient, bottom |
+| `--c-scan-ink` | `#f4eedd` | scan overlay chrome (title, hint, close button) |
+| `--c-scan-accent` | `var(--c-accent)` | the sweeping scan line |
+
+These are the one deliberate exception to the "a literal hex in `marea.css` is
+a bug" rule below, for two reasons. The QR tile is read by a **camera**, so
+decoder contrast outranks matching the page — it stays light even in dark mode.
+The scan overlay sits over a live camera feed rather than over app chrome, so
+it needs a palette that stays legible against any scene, independent of the
+app's. Both nevertheless resolve through `var()`, so an app that wants them
+themed can have that.
+
 ## Rules for framework components (enforced in review)
 
 - Semantic classes only (`btn-primary`, `m-card`, `bottom-nav__tab`, …),
   defined in `marea.css`; **no Tailwind utilities** in marea-ui rsx.
 - Every color in `marea.css` is a `var(--c-*)` reference — a literal hex in
-  that file is a bug.
+  that file is a bug. The sole exception is the fallback argument of an
+  **Optional token** above (`var(--c-qr-bg, #ffffff)`); a bare hex is still a
+  bug.
 - SVG icons use `currentColor` (never interpolated hex attributes), so
   active/inactive states are pure CSS.
 - Components accept a `class` prop appended after their base classes, so apps

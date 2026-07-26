@@ -606,3 +606,336 @@
   cursor: pointer;
   font-size: inherit;
 }
+
+/* ── QR pairing screen (`pairing` feature) ────────────────────────────────
+   Two columns — what-to-do on the left, the live code on the right —
+   collapsing to one under 900px. Desktop-first on purpose: this screen only
+   ever renders in a browser on a computer. */
+
+.pair-screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-bg);
+  color: var(--c-text);
+}
+.pair-screen__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 32px;
+}
+.pair-screen__mark { display: grid; place-content: center; color: var(--c-primary); }
+.pair-screen__brand {
+  font-family: var(--font-display, inherit);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--c-heading);
+}
+.pair-screen__card {
+  flex: 1;
+  margin: 0 32px 32px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-xl, 18px);
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  overflow: hidden;
+  min-height: 0;
+}
+.pair-screen__left {
+  padding: 46px 54px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+}
+.pair-screen__title {
+  font-family: var(--font-display, inherit);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.13;
+  letter-spacing: -0.01em;
+  color: var(--c-heading);
+  margin: 0;
+}
+.pair-screen__lede {
+  font-size: 1rem;
+  color: var(--c-text-2);
+  line-height: 1.5;
+  margin: 12px 0 0;
+  max-width: 24rem;
+}
+.pair-steps {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.pair-steps li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--c-text-2);
+}
+.pair-step-n {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--c-primary-muted);
+  color: var(--c-primary);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  flex: 0 0 auto;
+}
+.pair-screen__shield {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  font-size: 0.8rem;
+  color: var(--c-text-3);
+}
+.pair-screen__shield-icon { color: var(--c-primary); flex: 0 0 auto; }
+
+.pair-screen__right {
+  background: var(--c-surface-2);
+  border-left: 1px solid var(--c-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px;
+}
+.pair-screen__error { max-width: 300px; }
+.pair-screen__fallback { position: relative; }
+.pair-screen__back {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 24px;
+}
+
+.pair-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+.pair-status__label { font-size: 0.9rem; font-weight: 600; color: var(--c-text); }
+.pair-status__hint { font-size: 0.78rem; color: var(--c-text-3); }
+.pair-status__code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: var(--c-text-3);
+  letter-spacing: 0.06em;
+}
+
+/* The QR tile stays light in BOTH themes: it is read by a camera, and decoder
+   contrast beats matching the surrounding page. `--c-qr-bg` exists for apps
+   that really want to override it. */
+.qr-tile {
+  position: relative;
+  background: var(--c-qr-bg, #ffffff);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-md);
+  padding: 22px;
+  transition: opacity 150ms, filter 150ms;
+}
+.qr-tile--spent { opacity: 0.4; }
+.qr-tile--dead { opacity: 0.3; filter: grayscale(1); }
+/* The `qrcode` crate hard-codes width/height on its <svg>; scale it to the
+   tile instead of letting it overflow. */
+.qr-tile__code { width: 240px; height: 240px; }
+.qr-tile__code svg { width: 100%; height: 100%; display: block; }
+.qr-tile__logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--c-qr-bg, #ffffff);
+  border-radius: var(--radius-sm, 6px);
+  padding: 5px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 0 4px var(--c-qr-bg, #ffffff);
+  color: var(--c-primary);
+}
+.qr-tile__failed {
+  width: 240px;
+  height: 240px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--c-text-3);
+}
+
+@media (max-width: 900px) {
+  .pair-screen__card { grid-template-columns: 1fr; }
+  .pair-screen__left { padding: 32px 24px; }
+  .pair-screen__right { border-left: none; border-top: 1px solid var(--c-border); }
+}
+
+/* ── Pair-a-device section (`pairing` feature, phone side) ────────────────── */
+
+.pair-device { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.pair-device__hint { font-size: 0.8rem; color: var(--c-text-3); margin: -6px 0 0; }
+.pair-device__status { font-size: 0.9rem; color: var(--c-text-2); }
+.pair-device__status--ok { color: var(--c-success); font-weight: 600; }
+.pair-device__code { font-family: ui-monospace, monospace; letter-spacing: 0.06em; }
+
+.pair-confirm {
+  width: 100%;
+  border: 1px solid var(--c-primary);
+  background: var(--c-surface);
+  border-radius: var(--radius-lg, 14px);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pair-confirm__text { display: flex; flex-direction: column; gap: 4px; }
+.pair-confirm__title { font-size: 0.9rem; font-weight: 600; color: var(--c-text); }
+.pair-confirm__body { font-size: 0.8rem; color: var(--c-text-3); margin: 0; line-height: 1.5; }
+.pair-confirm__ids {
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: var(--c-text-2);
+  word-break: break-all;
+}
+.pair-confirm__actions { display: flex; gap: 8px; }
+.pair-confirm__actions > * { flex: 1; }
+
+/* ── Camera scanner (`scanner` feature) ───────────────────────────────────
+   The overlay sits over a live camera feed, so its palette is deliberately
+   independent of the app's: dark enough for the chrome to stay legible over
+   any scene. `--c-scan-*` let an app tune it; the fallbacks are the defaults
+   every app gets for free. */
+
+.scan-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.scan-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    160deg,
+    var(--c-scan-bg-from, #23272b),
+    var(--c-scan-bg-to, #2f3a22)
+  );
+  color: var(--c-scan-ink, #f4eedd);
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.scan-overlay__feed { position: absolute; inset: 0; }
+/* Diagonal grain over the feed — keeps the chrome readable against a bright
+   or busy scene without dimming the whole image. */
+.scan-overlay__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03) 0 12px,
+    transparent 12px 24px
+  );
+}
+.scan-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  z-index: 2;
+}
+.scan-bar__title {
+  font-family: var(--font-display, inherit);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--c-scan-ink, #f4eedd);
+}
+.scan-bar__btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  color: var(--c-scan-ink, #f4eedd);
+  background: rgba(255, 255, 255, 0.18);
+  transition: background 150ms;
+  flex: 0 0 auto;
+}
+.scan-bar__btn:hover { background: rgba(255, 255, 255, 0.28); }
+.scan-bar__btn:focus-visible {
+  outline: 2px solid var(--c-scan-ink, #f4eedd);
+  outline-offset: 2px;
+}
+/* Mirrors the close button's width so the title stays optically centered. */
+.scan-bar__btn--spacer { background: none; pointer-events: none; }
+
+.scan-frame {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+}
+.scan-frame__box {
+  width: 70%;
+  max-width: 280px;
+  aspect-ratio: 1 / 1;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius-xl, 18px);
+  position: relative;
+  overflow: hidden;
+}
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--c-scan-accent, var(--c-accent));
+  box-shadow: 0 0 12px var(--c-scan-accent, var(--c-accent));
+  animation: marea-scan-sweep 1.8s ease-in-out infinite;
+}
+@keyframes marea-scan-sweep {
+  0% { top: 4px; }
+  50% { top: calc(100% - 6px); }
+  100% { top: 4px; }
+}
+.scan-hint {
+  position: absolute;
+  bottom: 14%;
+  max-width: 80%;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  text-align: center;
+  color: var(--c-scan-ink, #f4eedd);
+  background: rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-line { animation: none; top: 50%; }
+}
