@@ -40,7 +40,10 @@ impl Items {
     pub fn all(&self) -> Vec<domain::Item> {
         let mut items: Vec<domain::Item> =
             self.rows.read().iter().filter_map(to_domain).collect();
-        items.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+        // Newest first. `Reverse` rather than a `sort_by` comparator with the
+        // arguments swapped: clippy's `unnecessary_sort_by` rejects the latter,
+        // and a generated project has to pass its own `-D warnings` gate.
+        items.sort_by_key(|i| std::cmp::Reverse(i.created_at));
         items
     }
 
