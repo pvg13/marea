@@ -1,0 +1,6 @@
+name = "my-app"
+targets = ["desktop"]
+with_example = false
+
+[auth]
+pocketbase_url = "https://admin.almares.es"

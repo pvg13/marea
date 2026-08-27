@@ -491,8 +491,7 @@ mod tests {
         let keys = WebPairingKeys::generate();
         let pubkey = keys.pubkey_b64();
         let code = generate_code();
-        let (got_code, got_pubkey) =
-            parse_pair_url(&CFG, &pair_url(&CFG, &code, &pubkey)).unwrap();
+        let (got_code, got_pubkey) = parse_pair_url(&CFG, &pair_url(&CFG, &code, &pubkey)).unwrap();
         assert_eq!(got_code, code);
         assert_eq!(got_pubkey, pubkey);
 

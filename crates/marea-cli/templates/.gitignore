@@ -1,0 +1,26 @@
+/target
+**/target
+/dist
+**/dist
+
+# dx build output
+/.dioxus
+**/.dioxus
+
+# Local overrides
+.env
+.env.local
+
+# Editors / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Never commit signing material or service credentials
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist

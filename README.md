@@ -11,15 +11,28 @@ component library from here.
 |---|---|
 | `marea-auth` | PocketBase client (login/register/refresh, structured field errors), `AuthSession`, Argon2id PSK derivation with per-app domain salt, JWT freshness, QR-pairing crypto (`pairing` feature), Dioxus session hooks (`dioxus` feature) |
 | `marea-sync` | `DbLocator` (per-app/per-account SQLite locations), `registry_name!`, idempotent `schema::ensure_columns`, the safe CRDT write facades (`SyncDbExt` on `WaveSyncDb`, cross-target `SyncHandleExt` on `SyncHandle`), re-exported `wavesyncdb` |
+| `marea-cli` | The `marea new` scaffolder: generates a `domain / data / ui / app-*` workspace from a set of selected options, pins its lockfile to the commits marea was built against, then builds it and runs the architecture gates (see `docs/scaffolding.md`) |
 | `marea-ui` | `AppShell` (theme restore, providers, auth gate, uid-keyed subtree), `NavShell` (sidebar ≥768px / bottom tabs, `mobile_only` mode), `LoginScreen`, component library, toasts, `ThemeCtl`, push-token context, `Locale`, camera scanner (`scanner` feature), QR-pairing screens (`pairing` feature), Android back gesture (`android-back` feature) |
+
+## Starting a new app
+
+```sh
+cargo install --path crates/marea-cli
+marea new ~/Projects/my-app
+```
+
+Asks for targets (desktop / android / ios / web), auth, WaveSyncDB, marea
+features, styling and repository extras; writes the workspace; then compiles it
+and runs the four architecture gates. `docs/scaffolding.md` covers the
+generated layout and how to extend the generator.
 
 ## How an app plugs in
 
 ```toml
 # workspace Cargo.toml — specs must be BYTE-IDENTICAL across apps + marea
-marea-auth = { path = "../dioxus/crates/marea-auth", features = ["dioxus"] }  # TODO: git tag
-marea-ui   = { path = "../dioxus/crates/marea-ui" }
-marea-sync = { path = "../dioxus/crates/marea-sync" }
+marea-auth = { path = "../marea/crates/marea-auth", features = ["dioxus"] }  # TODO: git tag
+marea-ui   = { path = "../marea/crates/marea-ui" }
+marea-sync = { path = "../marea/crates/marea-sync" }
 dioxus-sdk-storage = { git = "https://github.com/DioxusLabs/sdk.git", rev = "15525043cadc3c467afb15888ce804bdc9b6a46e" }
 wavesyncdb = { git = "https://github.com/pvg13/WaveSyncDB.git", branch = "dev" }
 ```
@@ -47,10 +60,21 @@ as parchment-olive, teal, or sage purely through that file.
 
 ## Rules that keep the mesh working
 
-1. **Duplicate-dep gate**: `cargo tree -d` must show one copy of
-   `wavesyncdb`, `dioxus`, `sea-orm`, `dioxus-sdk-storage`. Different git
-   specs (branch vs rev) for the same URL resolve twice and break contexts
-   at runtime.
+1. **Duplicate-dep gate**: `wavesyncdb`, `dioxus`, `sea-orm` and
+   `dioxus-sdk-storage` must each resolve to exactly one copy. Different git
+   specs (branch vs rev) for the same URL resolve twice and break contexts at
+   runtime. Check the specific crates rather than expecting `cargo tree -d` to
+   be empty — it never is (~86 duplicate leaves come from the dioxus desktop
+   stack alone, and none of them matter):
+
+   ```sh
+   cargo tree -d | grep -E '^(wavesyncdb|dioxus|sea-orm|dioxus-sdk-storage) v'   # must be empty
+   ```
+
+   Specs pin the *source*; the lockfile pins the *commit*. `wavesyncdb` tracks
+   a branch, so a project without a lockfile floats to the branch tip and can
+   fail to compile against framework code marea has never seen. `marea new`
+   pins generated lockfiles to this workspace's resolved revisions.
 2. **Compatibility invariants** (per migrated app, locked with tests):
    PSK salt domain + Argon2id params, session storage key + `AuthSession`
    JSON shape, DB paths (`DbLocator` args), schema-registry name, WaveSync

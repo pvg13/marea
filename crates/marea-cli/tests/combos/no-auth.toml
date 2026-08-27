@@ -1,0 +1,3 @@
+name = "my-app"
+targets = ["web"]
+with_example = false

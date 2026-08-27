@@ -2,11 +2,8 @@ target/
 dist/
 .DS_Store
 
-# Legacy pre-marea dirs (own git repos / stubs), kept on disk untracked until
-# their disposition phase: dioxus-theme folds into marea-ui, dioxus-template
-# gets reworked as the marea template, examples are replaced by the showcase.
-/dioxus-template/
-/dioxus-theme/
-/example/
-/example-theme-app/
-/dioxus-auth/
+# dx build output
+.dioxus/
+
+# Local Claude Code overrides
+.claude/settings.local.json

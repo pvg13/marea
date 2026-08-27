@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* Tailwind for {{ title }}'s own screens.
+ *
+ * marea's components never use utility classes — they are styled entirely by
+ * `marea.css` over the `--c-*` tokens — so nothing here changes how they
+ * render, and no cross-crate class scanning is needed.
+ *
+ * The two systems meet through the tokens below: using `bg-surface` instead of
+ * `bg-white` means a utility-styled screen still follows the theme toggle and
+ * any future reskin. Reaching for a literal colour is how an app quietly
+ * leaves its own design system.
+ */
+
+@theme {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-border: var(--c-border);
+  --color-text: var(--c-text);
+  --color-text-2: var(--c-text-2);
+  --color-heading: var(--c-heading);
+  --color-primary: var(--c-primary);
+  --color-accent: var(--c-accent);
+  --color-success: var(--c-success);
+  --color-warning: var(--c-warning);
+  --color-danger: var(--c-danger);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+}

@@ -1,0 +1,53 @@
+/* {{ title }}'s own styles.
+ *
+ * marea.css already styles every component, nav shell and screen primitive.
+ * This file is for the layout and chrome that belong to this app alone.
+ *
+ * One rule worth keeping: use the `--c-*` tokens rather than literal colours.
+ * A hardcoded hex is invisible to the theme toggle and to any future reskin,
+ * and it is the single most common way an app drifts out of its own design
+ * system.
+ */
+
+/* Standard page scaffold: a top bar that stays put, body content that
+   scrolls, and comfortable gutters that tighten on phones. */
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.page__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+@media (min-width: 768px) {
+  .page__body {
+    gap: 20px;
+    padding: 24px;
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+/* Horizontal option group — the language picker, and anything else offering a
+   short list of mutually exclusive choices. Wraps rather than overflowing,
+   because a language list grows and a phone is narrow. */
+.lang-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Buttons that act on the form above them. Separated from the last field so
+   the button does not read as part of it. */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}

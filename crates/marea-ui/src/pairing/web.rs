@@ -41,11 +41,14 @@ pub fn PairScreen(
     config: &'static PairingConfig,
     #[props(default)] strings: PairingStrings,
     /// Brand mark for the top bar.
-    #[props(default)] logo: Option<Element>,
+    #[props(default)]
+    logo: Option<Element>,
     /// Brand name for the top bar.
-    #[props(default)] brand: Option<String>,
+    #[props(default)]
+    brand: Option<String>,
     /// Smaller mark floated over the QR's centre.
-    #[props(default)] qr_badge: Option<Element>,
+    #[props(default)]
+    qr_badge: Option<Element>,
     /// Shown when the user picks "sign in with email". Defaults to
     /// [`LoginScreen`](crate::auth_screens::LoginScreen). Pass `None` to
     /// offer no fallback at all — the button then disappears.
@@ -55,7 +58,9 @@ pub fn PairScreen(
     let mut mode = use_signal(|| Mode::Qr);
     let has_fallback = email_fallback.is_some();
 
-    if mode() == Mode::Email && let Some(fallback) = email_fallback {
+    if mode() == Mode::Email
+        && let Some(fallback) = email_fallback
+    {
         return rsx! {
             div { class: "pair-screen__fallback",
                 {fallback}

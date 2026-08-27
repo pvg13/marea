@@ -1,0 +1,74 @@
+name: Scaffolder
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Fast: the generator's own tests never compile a generated project.
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test -p marea-cli
+      - run: cargo clippy -p marea-cli --all-targets -- -D warnings
+
+  # Slow, and the part that actually matters: every option combination must
+  # produce a workspace that builds. A template can render perfectly and still
+  # not compile, so nothing but compiling it is evidence.
+  combos:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        combo: [minimal, synced, full, no-auth]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+
+      # Desktop builds link against the system webview.
+      - name: System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev libxdo-dev
+
+      # Generated under a sibling of the marea checkout so path-dep detection
+      # takes the same branch a developer would exercise locally.
+      - name: Generate and verify ${{ matrix.combo }}
+        run: |
+          cargo run -p marea-cli -- new "$RUNNER_TEMP/gen/${{ matrix.combo }}" \
+            --config crates/marea-cli/tests/combos/${{ matrix.combo }}.toml
+        env:
+          MAREA_PATH: ${{ github.workspace }}
+
+      # `marea new` already ran fmt, the lockfile pin, cargo check and the
+      # architecture gates. The browser build is the remaining half.
+      - name: Browser build
+        working-directory: ${{ runner.temp }}/gen/${{ matrix.combo }}
+        run: |
+          if [ -d crates/app-web ]; then
+            packages="-p ui"
+            [ -d crates/data ] && packages="$packages -p data"
+            cargo check $packages --target wasm32-unknown-unknown
+          else
+            echo "combo has no web target"
+          fi
+
+      - name: Generated tests and lints
+        working-directory: ${{ runner.temp }}/gen/${{ matrix.combo }}
+        run: |
+          cargo test --workspace
+          cargo clippy --workspace --all-targets -- -D warnings

@@ -60,15 +60,20 @@ pub fn PairScreenView(
     code: String,
     #[props(default)] strings: PairingStrings,
     /// Failure detail, rendered above the status line.
-    #[props(default)] error: Option<String>,
+    #[props(default)]
+    error: Option<String>,
     /// Brand mark for the top bar.
-    #[props(default)] logo: Option<Element>,
+    #[props(default)]
+    logo: Option<Element>,
     /// Brand name for the top bar.
-    #[props(default)] brand: Option<String>,
+    #[props(default)]
+    brand: Option<String>,
     /// Smaller mark floated over the QR's centre.
-    #[props(default)] qr_badge: Option<Element>,
+    #[props(default)]
+    qr_badge: Option<Element>,
     /// Offers the email/password fallback when set.
-    #[props(default)] on_use_email: Option<EventHandler<()>>,
+    #[props(default)]
+    on_use_email: Option<EventHandler<()>>,
 ) -> Element {
     let (label, hint) = state.labels(&strings);
 

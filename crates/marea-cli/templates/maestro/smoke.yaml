@@ -1,0 +1,42 @@
+# {{ title }} — smoke flow.
+#
+#   maestro test maestro/smoke.yaml
+#
+# Deliberately shallow: it checks that the app launches, gets past the
+{%- if auth %}
+# login gate, and can navigate. Deep flows go stale faster than they catch
+{%- else %}
+# first screen, and can navigate. Deep flows go stale faster than they catch
+{%- endif %}
+# regressions; this one only breaks when something genuinely broke.
+appId: com.example.{{ snake }}
+---
+- launchApp:
+    clearState: true
+{% if auth %}
+# Pre-login: marea's LoginScreen.
+- assertVisible: "{{ title }}"
+- tapOn:
+    id: "email"
+- inputText: "${MAESTRO_TEST_EMAIL}"
+- tapOn:
+    id: "password"
+- inputText: "${MAESTRO_TEST_PASSWORD}"
+- tapOn: "Log in"
+{% endif %}
+# Bottom tabs — NavShell renders these below 768px.
+- assertVisible: "Home"
+{%- if with_example and wavesync %}
+
+- tapOn: "Items"
+- assertVisible: "Items"
+{%- endif %}
+
+- tapOn: "Settings"
+- assertVisible: "Appearance"
+{%- if android_back %}
+
+# The system back gesture should pop the router, not kill the app.
+- back
+- assertVisible: "Home"
+{%- endif %}

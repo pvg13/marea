@@ -1,0 +1,8 @@
+# Signal read/write guards held across an `.await` are the classic Dioxus 0.7
+# deadlock: the guard keeps the borrow alive while the task yields, and the
+# next reader of that signal blocks forever.
+await-holding-invalid-types = []
+
+# Screens pass strings around constantly; the default threshold flags honest
+# component props.
+too-many-arguments-threshold = 10

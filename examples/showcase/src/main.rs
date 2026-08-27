@@ -9,9 +9,9 @@
 use dioxus::prelude::*;
 use marea_auth::AuthConfig;
 use marea_ui::{
-    use_theme, use_toasts, AppShell, Avatar, AvatarSize, Button, ButtonVariant, Card, CardPad,
-    Checkbox, Divider, EmptyState, Eyebrow, InfoRow, Input, LoadingSkeleton, NavItem, NavShell,
-    Pill, PillTone, Row, ScreenHeader, SectionHeader, ThemeMode, TopBar, MAREA_CSS,
+    AppShell, Avatar, AvatarSize, Button, ButtonVariant, Card, CardPad, Checkbox, Divider,
+    EmptyState, Eyebrow, InfoRow, Input, LoadingSkeleton, MAREA_CSS, NavItem, NavShell, Pill,
+    PillTone, Row, ScreenHeader, SectionHeader, ThemeMode, TopBar, use_theme, use_toasts,
 };
 
 static AUTH: AuthConfig = AuthConfig {

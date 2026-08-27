@@ -1,0 +1,15 @@
+name = "my-app"
+targets = ["desktop", "android", "web"]
+with_example = true
+bundle_id = "es.almares.myapp"
+
+[auth]
+pocketbase_url = "https://admin.almares.es"
+
+[engine]
+kind = "wave-sync"
+relay = "/dns4/relay.almares.es/tcp/443/wss/p2p/12D3KooWH2ZzVdXehxyNa1QDeWrBLAWKynMVPn8BK2LaDCTiPs4D"
+
+[features]
+android_back = true
+locales = ["en", "es"]

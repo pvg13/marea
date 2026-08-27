@@ -1,0 +1,13 @@
+# {{ title }} — local container run of the web build.
+#
+#   docker compose up --build
+#
+# The sync relay is NOT here on purpose: it is shared infrastructure with its
+# own lifecycle, and pointing at a throwaway relay would mean this app's data
+# never reaches the phones it is supposed to sync with.
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    restart: unless-stopped

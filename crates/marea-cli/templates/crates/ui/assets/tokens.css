@@ -1,8 +1,15 @@
-/* Reference token file — copy into your app's stylesheet and reskin.
-   This neutral palette exists so a fresh app renders sensibly before design
-   work starts. Every variable here is REQUIRED by marea.css (see
-   docs/theme-contract.md); app-specific tokens go below it under your own
-   prefix. */
+/* {{ title }} — theme tokens.
+ *
+ * This IS the design system. Every colour, radius and shadow in marea's
+ * stylesheet resolves through these variables, so reskinning the whole app —
+ * components, nav shell, login screen, toasts — means editing this file and
+ * nothing else. See marea's `docs/theme-contract.md` for what each token
+ * controls; every variable below is REQUIRED.
+ *
+ * Starting point: marea's neutral reference palette, so the app renders
+ * sensibly before any design work. App-specific tokens go at the bottom under
+ * your own prefix.
+ */
 
 :root {
   --c-bg:              #f6f7f8;

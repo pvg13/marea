@@ -312,7 +312,10 @@ mod tests {
     #[test]
     fn scanner_js_substitutes_the_format_list() {
         let js = scanner_js_for(QR_FORMATS);
-        assert!(js.contains("new BarcodeDetector({ formats: ['qr_code'] })"), "{js}");
+        assert!(
+            js.contains("new BarcodeDetector({ formats: ['qr_code'] })"),
+            "{js}"
+        );
         assert!(!js.contains("__FORMATS__"));
     }
 

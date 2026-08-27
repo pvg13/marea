@@ -1,0 +1,46 @@
+# When each template is emitted.
+#
+# Keys are paths in this template tree; values are minijinja expressions over
+# the variables in `render::Vars` (`auth`, `wavesync`, `web`, `mobile`,
+# `pairing`, `with_example`, …). A template with no entry here is always
+# emitted.
+#
+# Prefer giving a feature its own file over an `{% if %}` inside a shared one:
+# a template that reads like the code it becomes is a template people will
+# keep correct.
+
+"crates/app-desktop/src/main.rs" = "desktop"
+"crates/app-mobile/src/main.rs" = "mobile"
+"crates/app-web/src/main.rs" = "web"
+
+# The worked example slice demonstrates domain → data → ui. With no engine
+# there is no data layer to demonstrate, so `home` and `settings` are the
+# example instead.
+"crates/domain/src/item.rs" = "with_example and wavesync"
+
+# The data crate exists only with an engine.
+"crates/data/src/lib.rs" = "wavesync"
+"crates/data/src/entities/mod.rs" = "wavesync"
+"crates/data/src/repo/mod.rs" = "wavesync"
+"crates/data/src/bootstrap/mod.rs" = "wavesync"
+"crates/data/src/bootstrap/native.rs" = "wavesync and native"
+"crates/data/src/bootstrap/web.rs" = "wavesync and web"
+"crates/data/src/entities/item.rs" = "wavesync and with_example"
+"crates/data/src/repo/items.rs" = "wavesync and with_example"
+"crates/ui/src/features/items/mod.rs" = "wavesync and with_example"
+"crates/ui/src/features/items/screen.rs" = "wavesync and with_example"
+"crates/ui/src/features/items/i18n.rs" = "wavesync and with_example"
+
+# Repository furniture.
+"CLAUDE.md" = "agent_docs"
+"AGENTS.md" = "agent_docs"
+"clippy.toml" = "clippy"
+"docs/architecture.md" = "docs"
+".github/workflows/ci.yml" = "ci"
+"crates/ui/assets/tailwind.in.css" = "tailwind"
+"crates/ui/assets/tailwind.css" = "tailwind"
+"maestro/smoke.yaml" = "e2e"
+"Dockerfile" = "containers and web"
+"nginx.conf" = "containers and web"
+"docker-compose.yml" = "containers and web"
+"DEPLOY.md" = "containers"

@@ -1,9 +1,16 @@
 [workspace]
 resolver = "3"
-members = ["crates/marea-auth", "crates/marea-sync", "crates/marea-ui", "examples/showcase"]
-# `template` is a cargo-generate template ({{placeholders}} in its manifest);
-# the rest are legacy pre-marea dirs kept on disk untracked.
-exclude = ["template", "dioxus-theme", "dioxus-template", "example", "example-theme-app"]
+members = [
+    "crates/marea-auth",
+    "crates/marea-cli",
+    "crates/marea-sync",
+    "crates/marea-ui",
+    "examples/showcase",
+]
+# Legacy pre-marea dirs kept on disk, untracked. (The old single-crate
+# `template/` is gone — `crates/marea-cli` generates apps now; see
+# docs/scaffolding.md.)
+exclude = ["dioxus-theme", "dioxus-template", "example", "example-theme-app"]
 
 [workspace.package]
 version = "0.1.0"

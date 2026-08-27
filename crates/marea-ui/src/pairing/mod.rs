@@ -143,13 +143,11 @@ impl Default for PairingStrings {
             status_failed: "Pairing failed",
 
             device_section_title: "Pair a device",
-            device_section_hint:
-                "Scan the code shown on the computer to sign in there without typing your password.",
+            device_section_hint: "Scan the code shown on the computer to sign in there without typing your password.",
             open_scanner: "Scan code",
             point_qr: "Point the camera at the code on your screen",
             confirm_title: "Sign in on that device?",
-            confirm_body:
-                "Your session will be encrypted and sent to the device showing this code. Only that device can read it.",
+            confirm_body: "Your session will be encrypted and sent to the device showing this code. Only that device can read it.",
             confirm_button: "Sign in there",
             sending: "Sending to",
             done: "Signed in on the other device",

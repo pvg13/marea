@@ -1,0 +1,10 @@
+/* Compiled Tailwind output — GENERATED, overwritten by every `dx` build.
+ *
+ * The source is `tailwind.in.css` next to this file. This placeholder is
+ * committed rather than gitignored for one reason: `asset!("/assets/tailwind.css")`
+ * in `ui/src/app.rs` resolves at compile time, so `cargo check` on a fresh
+ * clone fails if the file is missing — and CI runs clippy and the tests long
+ * before anything runs `dx`.
+ *
+ * Do not edit. Edit `tailwind.in.css`.
+ */
