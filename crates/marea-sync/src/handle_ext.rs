@@ -139,7 +139,10 @@ impl SyncHandleExt for SyncHandle {
     where
         E: SyncedTableEntity,
     {
-        let signal = self.client();
+        // `client()` became `group()` in WaveSyncDB dbc5a36: the web engine
+        // grew multiple groups per client, and a handle now names one of them.
+        // `submit_local_write` is unchanged and stamps this group's topic.
+        let signal = self.group();
         let Some(client) = signal.read().clone() else {
             return Err(SyncSubmitError::NotConnected);
         };
