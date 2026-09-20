@@ -26,6 +26,12 @@ pub mod scanner;
 #[cfg(feature = "pairing")]
 pub mod pairing;
 
+/// Local scheduled reminders (`local-notify` feature): notifications the
+/// device posts to itself, with no server involved. Off by default — it
+/// bundles a Gradle submodule and declares `RECEIVE_BOOT_COMPLETED`.
+#[cfg(feature = "local-notify")]
+pub mod notify;
+
 /// Android back gesture → router (`android-back` feature). Inert on every
 /// other target, but opt-in because it exports a fixed JNI symbol.
 #[cfg(feature = "android-back")]

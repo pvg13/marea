@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Android 13+ (API 33+). Without it a posted notification is dropped
+         silently — the post throws SecurityException, which MareaReminders
+         catches and logs. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Alarms do not survive a reboot. MareaBootReceiver re-arms the stored
+         set; without this permission it is never called and every reminder
+         is silently lost the first time the phone restarts. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Deliberately NOT declared: SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM.
+         Play restricts exact alarms to alarm clocks and calendars, and a
+         household reminder is neither. MareaReminders uses
+         setAndAllowWhileIdle, which needs no permission and lands within a
+         few minutes of the asked-for time. See notify.rs for why that is the
+         right trade for this kind of reminder. -->
+
+    <application>
+        <receiver
+            android:name="dev.dioxus.main.MareaAlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name="dev.dioxus.main.MareaBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- Some OEM skins send this one instead after an update. -->
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
