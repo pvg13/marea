@@ -12,7 +12,7 @@ crates/marea-auth    PocketBase + AuthSession + PSK + pairing crypto (+dioxus ho
 crates/marea-sync    WaveSyncDB conventions: DbLocator, registry_name!, schema, write facades
 crates/marea-ui      AppShell, NavShell, LoginScreen, components, toasts, theme, push, i18n
                      (+ features: `scanner` camera, `pairing` QR login, `android-back` JNI,
-                      `local-notify` device-scheduled reminders)
+                      `local-notify` device-scheduled reminders, `deeplink` open-with-URL)
 crates/marea-cli     `marea new` scaffolder: generates domain/data/ui/app-* app
                      workspaces (templates/ + structural manifest builders)
 examples/showcase    real app exercising everything (dx serve from its dir)

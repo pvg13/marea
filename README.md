@@ -12,7 +12,7 @@ component library from here.
 | `marea-auth` | PocketBase client (login/register/refresh, structured field errors), `AuthSession`, Argon2id PSK derivation with per-app domain salt, JWT freshness, QR-pairing crypto (`pairing` feature), Dioxus session hooks (`dioxus` feature) |
 | `marea-sync` | `DbLocator` (per-app/per-account SQLite locations), `registry_name!`, idempotent `schema::ensure_columns`, the safe CRDT write facades (`SyncDbExt` on `WaveSyncDb`, cross-target `SyncHandleExt` on `SyncHandle`), re-exported `wavesyncdb` |
 | `marea-cli` | The `marea new` scaffolder: generates a `domain / data / ui / app-*` workspace from a set of selected options, pins its lockfile to the commits marea was built against, then builds it and runs the architecture gates (see `docs/scaffolding.md`) |
-| `marea-ui` | `AppShell` (theme restore, providers, auth gate, uid-keyed subtree), `NavShell` (sidebar ≥768px / bottom tabs, `mobile_only` mode), `LoginScreen`, component library, toasts, `ThemeCtl`, push-token context, `Locale`, camera scanner (`scanner` feature), QR-pairing screens (`pairing` feature), Android back gesture (`android-back` feature), local scheduled reminders (`local-notify` feature) |
+| `marea-ui` | `AppShell` (theme restore, providers, auth gate, uid-keyed subtree), `NavShell` (sidebar ≥768px / bottom tabs, `mobile_only` mode), `LoginScreen`, component library, toasts, `ThemeCtl`, push-token context, `Locale`, camera scanner (`scanner` feature), QR-pairing screens (`pairing` feature), Android back gesture (`android-back` feature), local scheduled reminders (`local-notify` feature), deeplink delivery (`deeplink` feature) |
 
 ## Starting a new app
 

@@ -26,6 +26,12 @@ android-back = []
 # turns it on, and because it declares RECEIVE_BOOT_COMPLETED — neither belongs
 # in an app that never schedules anything.
 local-notify = ["dep:serde_json", "dep:manganis"]
+# The URL the app was opened with, delivered to the router. Opt-in for
+# `android-back`'s reason: it exports a fixed JNI symbol
+# (`Java_dev_dioxus_main_MainActivity_onDeeplink`), so an app that wants to
+# handle its own intents would otherwise hit a duplicate-symbol link error with
+# no way out.
+deeplink = []
 
 [dependencies]
 dioxus = { workspace = true }
