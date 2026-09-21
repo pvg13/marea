@@ -178,7 +178,19 @@ mod imp {
     where
         F: FnOnce(&mut jni::JNIEnv, &JClass, &JObject) -> Result<(), jni::errors::Error>,
     {
-        let ctx = ndk_context::android_context();
+        // `android_context()` **panics** when the context has not been
+        // installed yet — `.expect("android context was not initialized")`,
+        // not a null one to check. A screen that asks whether it may post
+        // notifications can plausibly render before the activity glue has run,
+        // and "not ready yet" is a state rather than a reason to take the
+        // process down. Defensive: this has not been observed in the wild,
+        // and the guard is here because the failure it prevents is a crash
+        // rather than a wrong answer.
+        let Ok(ctx) = std::panic::catch_unwind(ndk_context::android_context) else {
+            return Err(NotifyError::Unavailable(
+                "the Android context is not installed yet".into(),
+            ));
+        };
         if ctx.vm().is_null() || ctx.context().is_null() {
             return Err(NotifyError::Unavailable("no Android context".into()));
         }

@@ -37,6 +37,12 @@ pub mod notify;
 #[cfg(feature = "android-back")]
 pub mod back_gesture;
 
+/// The URL the app was opened with (`deeplink` feature). Opt-in for
+/// `android-back`'s reason: it exports a fixed JNI symbol, so an app that
+/// wants to own its own intent handling must be able to decline it.
+#[cfg(feature = "deeplink")]
+pub mod deeplink;
+
 pub use auth_screens::LoginScreen;
 pub use components::*;
 pub use i18n::{Locale, LocaleCtl, provide_locale, use_locale};
