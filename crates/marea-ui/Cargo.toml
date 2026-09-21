@@ -20,13 +20,25 @@ pairing = ["scanner", "dep:qrcode", "marea-auth/pairing"]
 # back handling itself would otherwise hit a duplicate-symbol link error with
 # no way to opt out.
 android-back = []
+# Local scheduled reminders: notifications the device posts to itself, with no
+# server anywhere. Opt-in because it bundles a Gradle submodule (two broadcast
+# receivers plus the manifest entries they need) into every Android build that
+# turns it on, and because it declares RECEIVE_BOOT_COMPLETED — neither belongs
+# in an app that never schedules anything.
+local-notify = ["dep:serde_json", "dep:manganis"]
 
 [dependencies]
 dioxus = { workspace = true }
 dioxus-sdk-storage = { workspace = true }
 marea-auth = { path = "../marea-auth", features = ["dioxus"] }
 serde = { workspace = true }
+serde_json = { workspace = true, optional = true }
 log = { workspace = true }
+
+# Only `local-notify` uses it, and only on Android — but `#[manganis::ffi]`
+# is a macro the crate must be able to name at expansion time, so it is a
+# plain optional dependency rather than a target-scoped one.
+manganis = { version = "0.7.6", optional = true }
 
 # QR *generation* for the pairing tile. Spec must stay byte-identical to
 # MediterraneaDiente's (`packages/ui/Cargo.toml`) — see the workspace manifest's
@@ -45,6 +57,10 @@ tokio = { workspace = true }
 # which is the cost that actually mattered.
 [target.'cfg(target_os = "android")'.dependencies]
 jni = { workspace = true }
+# The Activity's `JavaVM` and `Context`, which `local-notify` needs to reach
+# the Kotlin half. Scoped to Android for the same reason `jni` is: Cargo
+# cannot express "optional dependency of a target table, gated on a feature".
+ndk-context = "0.1"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 gloo-timers = { version = "0.3", features = ["futures"] }
