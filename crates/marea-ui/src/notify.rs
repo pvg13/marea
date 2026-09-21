@@ -121,14 +121,42 @@ pub fn cancel_all() -> Result<(), NotifyError> {
     imp::cancel_all()
 }
 
+/// Whether this build can schedule a reminder at all.
+///
+/// Distinct from [`can_post`], and the distinction is the difference between
+/// two sentences a person reads: *"reminders only work on the phone"*, which
+/// is a fact about the build and nothing anyone can act on, and *"notifications
+/// are switched off for this app"*, which is a setting they can go and change.
+/// Collapsing the two is how someone ends up being told to fix something that
+/// does not exist on their platform.
+pub const fn supported() -> bool {
+    cfg!(target_os = "android")
+}
+
 /// Whether the OS will actually show what this module posts.
 ///
-/// `false` when the person declined the notification permission, or turned the
-/// app's notifications off in system settings afterwards. A screen offering
-/// reminders should ask this before promising one, and say so plainly rather
-/// than arming something that will never appear.
+/// `false` when the person declined the notification permission, **or** turned
+/// the app's notifications off in system settings afterwards — two independent
+/// switches, either of which drops a notification silently, and this answers
+/// for both. A screen offering reminders should ask before promising one
+/// rather than arming something that will never appear.
 pub fn can_post() -> bool {
     imp::can_post()
+}
+
+/// Ask the person for permission to post notifications.
+///
+/// Returns whether a prompt was actually raised. `false` means there was
+/// nothing to ask — already granted, a platform with no such permission, or an
+/// Android that has stopped showing the prompt because it was refused twice —
+/// and a screen should keep saying where the setting lives rather than treating
+/// `false` as a refusal.
+///
+/// Worth calling even though [`can_post`] exists: on Android 13+ the
+/// permission is **only** grantable through this prompt, so an app that never
+/// asks is an app whose reminders never work for anybody who installs it.
+pub fn request_permission() -> bool {
+    imp::request_permission()
 }
 
 #[cfg(target_os = "android")]
@@ -210,19 +238,32 @@ mod imp {
     }
 
     pub(super) fn can_post() -> bool {
-        let mut allowed = false;
+        call_bool("canPost")
+    }
+
+    pub(super) fn request_permission() -> bool {
+        call_bool("requestPermission")
+    }
+
+    /// Call a `static boolean f(Context)` on the Kotlin half.
+    ///
+    /// `false` on any failure, which is the safe direction for both callers:
+    /// "cannot post" and "nothing was asked" are the answers that make a
+    /// screen tell the truth rather than promise something.
+    fn call_bool(method: &str) -> bool {
+        let mut answer = false;
         let _ = with_class(|env, class, context| {
-            allowed = env
+            answer = env
                 .call_static_method(
                     class,
-                    "canPost",
+                    method,
                     "(Landroid/content/Context;)Z",
                     &[JValue::Object(context)],
                 )?
                 .z()?;
             Ok(())
         });
-        allowed
+        answer
     }
 }
 
@@ -251,6 +292,11 @@ mod imp {
     /// deciding whether to promise someone a notification, and on a platform
     /// that cannot post one the honest answer is no.
     pub(super) fn can_post() -> bool {
+        false
+    }
+
+    /// Nothing to ask for where nothing can be posted.
+    pub(super) fn request_permission() -> bool {
         false
     }
 }
@@ -309,5 +355,15 @@ mod tests {
     #[test]
     fn an_empty_set_is_an_empty_array_rather_than_nothing() {
         assert_eq!(payload(&[]), "[]");
+    }
+
+    /// A platform that cannot schedule must not report that it merely lacks
+    /// permission — the two produce different copy, and only one of them is
+    /// something a person can do anything about.
+    #[test]
+    fn a_platform_that_cannot_schedule_can_never_post() {
+        if !supported() {
+            assert!(!can_post());
+        }
     }
 }
