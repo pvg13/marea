@@ -1,5 +1,6 @@
 package dev.dioxus.main
 
+import android.app.Activity
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,11 +8,14 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -51,6 +55,9 @@ object MareaReminders {
     private const val CHANNEL_ID = "marea_reminders"
     private const val PREFS = "marea_reminders"
     private const val KEY_ARMED = "armed"
+
+    /** Arbitrary, and never read back: nothing here waits for the answer. */
+    private const val REQUEST_CODE = 8731
 
     const val EXTRA_ID = "marea.reminder.id"
     const val EXTRA_TITLE = "marea.reminder.title"
@@ -206,6 +213,44 @@ object MareaReminders {
     @JvmStatic
     fun canPost(context: Context): Boolean =
         NotificationManagerCompat.from(context).areNotificationsEnabled()
+
+    /**
+     * Ask for the notification permission, if there is anything to ask.
+     *
+     * On Android 13+ a notification the app was never given permission to post
+     * is simply dropped, and the permission is **only** grantable through this
+     * prompt — an app that never asks is an app whose reminders never work for
+     * anyone who installs it. Below 33 the permission does not exist and this
+     * is a no-op.
+     *
+     * Needs the **Activity**, not the application context, so it deliberately
+     * does not call `applicationContext` the way the arming path does.
+     * Returns false when there is nothing to ask — already granted, too old an
+     * Android, or no Activity — so the caller can fall back to telling the
+     * person where the setting lives.
+     *
+     * The system stops showing the prompt after two refusals. That is
+     * indistinguishable from here, which is why the caller keeps its "you can
+     * turn these on in settings" line rather than replacing it with a button.
+     */
+    @JvmStatic
+    fun requestPermission(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
+        val activity = context as? Activity ?: return false
+        val permission = "android.permission.POST_NOTIFICATIONS"
+        if (ContextCompat.checkSelfPermission(activity, permission)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            return false
+        }
+        return try {
+            ActivityCompat.requestPermissions(activity, arrayOf(permission), REQUEST_CODE)
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "could not ask for the notification permission: ${e.message}")
+            false
+        }
+    }
 
     private fun forget(context: Context, id: String) {
         val prefs = context.applicationContext
