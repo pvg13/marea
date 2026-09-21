@@ -209,10 +209,30 @@ object MareaReminders {
         forget(context, id)
     }
 
-    /** Whether the app may post notifications at all. */
+    /**
+     * Whether the app may post notifications at all.
+     *
+     * **Both** checks, because there are two independent ways a notification
+     * is silently dropped and neither implies the other:
+     *
+     * * `areNotificationsEnabled()` is the app's notification toggle, which a
+     *   person can switch off in system settings long after granting anything;
+     * * `POST_NOTIFICATIONS` is the runtime permission, which exists from
+     *   API 33 and is what `notify()` actually throws on.
+     *
+     * They normally track each other, and the case that proved they do not is
+     * ordinary enough to matter: clearing the app's data revokes the
+     * permission while leaving the app-op that the first call reads set to
+     * allow. A screen trusting only the first then promises a reminder that
+     * will never be posted.
+     */
     @JvmStatic
-    fun canPost(context: Context): Boolean =
-        NotificationManagerCompat.from(context).areNotificationsEnabled()
+    fun canPost(context: Context): Boolean {
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return false
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
+        return ContextCompat.checkSelfPermission(context, "android.permission.POST_NOTIFICATIONS") ==
+            PackageManager.PERMISSION_GRANTED
+    }
 
     /**
      * Ask for the notification permission, if there is anything to ask.

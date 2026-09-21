@@ -135,10 +135,11 @@ pub const fn supported() -> bool {
 
 /// Whether the OS will actually show what this module posts.
 ///
-/// `false` when the person declined the notification permission, or turned the
-/// app's notifications off in system settings afterwards. A screen offering
-/// reminders should ask this before promising one, and say so plainly rather
-/// than arming something that will never appear.
+/// `false` when the person declined the notification permission, **or** turned
+/// the app's notifications off in system settings afterwards — two independent
+/// switches, either of which drops a notification silently, and this answers
+/// for both. A screen offering reminders should ask before promising one
+/// rather than arming something that will never appear.
 pub fn can_post() -> bool {
     imp::can_post()
 }
